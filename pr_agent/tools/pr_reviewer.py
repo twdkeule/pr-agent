@@ -156,7 +156,7 @@ class PRReviewer:
                 return None
 
             pr_review = self._prepare_pr_review()
-            get_logger().debug(f"PR output", artifact=pr_review)
+            get_logger().debug(pr_review)
 
             should_publish = get_settings().config.publish_output and self._should_publish_review_no_suggestions(pr_review)
             if not should_publish:

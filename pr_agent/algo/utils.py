@@ -711,6 +711,7 @@ def load_yaml(response_text: str, keys_fix_yaml: List[str] = [], first_key="", l
     try:
         data = yaml.safe_load(response_text)
     except Exception as e:
+        get_logger().info(response_text)
         get_logger().warning(f"Initial failure to parse AI prediction: {e}")
         data = try_fix_yaml(response_text, keys_fix_yaml=keys_fix_yaml, first_key=first_key, last_key=last_key,
                             response_text_original=response_text_original)
