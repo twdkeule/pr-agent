@@ -50,7 +50,7 @@ class OpenAIHandler(BaseAiHandler):
             get_logger().debug("User: {}", user)
             messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
             timeout = float(get_settings().config.ai_timeout)
-            client = AsyncOpenAI(timeout=timeout, base_url=self.api_base, api_key=self.api_key)
+            client = AsyncOpenAI(http_client=openai.DefaultAsyncHttpxClient(verify=False), timeout=timeout, base_url=self.api_base, api_key=self.api_key)
 
             # do not set temperature when not supported
             if model in NO_SUPPORT_TEMPERATURE_MODELS:
