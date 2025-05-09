@@ -82,7 +82,7 @@ class PRUpdateChangelog:
         if get_settings().get('config', {}).get('output_relevant_configurations', False):
             answer += show_relevant_configurations(relevant_section='pr_update_changelog')
 
-        get_logger().debug(f"PR output", artifact=answer)
+        get_logger().info(f"PR output: {answer}")
 
         if get_settings().config.publish_output:
             self.git_provider.remove_initial_comment()

@@ -40,12 +40,12 @@ class PRCodeSuggestions:
         )
 
         # limit context specifically for the improve command, which has hard input to parse:
-        if get_settings().pr_code_suggestions.max_context_tokens:
-            MAX_CONTEXT_TOKENS_IMPROVE = get_settings().pr_code_suggestions.max_context_tokens
-            if get_settings().config.max_model_tokens > MAX_CONTEXT_TOKENS_IMPROVE:
-                get_logger().info(f"Setting max_model_tokens to {MAX_CONTEXT_TOKENS_IMPROVE} for PR improve")
-                get_settings().config.max_model_tokens_original = get_settings().config.max_model_tokens
-                get_settings().config.max_model_tokens = MAX_CONTEXT_TOKENS_IMPROVE
+        # if get_settings().pr_code_suggestions.max_context_tokens:
+        #     MAX_CONTEXT_TOKENS_IMPROVE = get_settings().pr_code_suggestions.max_context_tokens
+        #     if get_settings().config.max_model_tokens > MAX_CONTEXT_TOKENS_IMPROVE:
+        #         get_logger().info(f"Setting max_model_tokens to {MAX_CONTEXT_TOKENS_IMPROVE} for PR improve")
+        #         get_settings().config.max_model_tokens_original = get_settings().config.max_model_tokens
+        #         get_settings().config.max_model_tokens = MAX_CONTEXT_TOKENS_IMPROVE
 
         num_code_suggestions = int(get_settings().pr_code_suggestions.num_code_suggestions_per_chunk)
 
@@ -131,6 +131,7 @@ class PRCodeSuggestions:
                 await self.publish_no_suggestions()
                 return
 
+                
             # publish the suggestions
             if get_settings().config.publish_output:
                 # If a temporary comment was published, remove it
@@ -162,6 +163,7 @@ class PRCodeSuggestions:
                         pr_body += show_relevant_configurations(relevant_section='pr_code_suggestions')
 
                     # publish the PR comment
+                    get_logger().debug(pr_body)
                     if get_settings().pr_code_suggestions.persistent_comment: # true by default
                         self.publish_persistent_comment_with_history(self.git_provider,
                                                                      pr_body,
@@ -187,6 +189,7 @@ class PRCodeSuggestions:
             else:
                 get_logger().info('Code suggestions generated for PR, but not published since publish_output is False.')
                 pr_body = self.generate_summarized_suggestions(data)
+                get_logger().debug(pr_body)
                 get_settings().data = {"artifact": pr_body}
                 return
         except Exception as e:

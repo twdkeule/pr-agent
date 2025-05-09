@@ -151,6 +151,8 @@ class PRDescription:
             if get_settings().get('config', {}).get('output_relevant_configurations', False):
                 pr_body += show_relevant_configurations(relevant_section='pr_description')
 
+            get_logger().debug(pr_body)
+
             if get_settings().config.publish_output:
 
                 # publish labels
