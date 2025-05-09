@@ -6,14 +6,14 @@
 
 [config]
 # models
-model="o4-mini"
-fallback_models=["gpt-4.1"]
-#model_reasoning="o4-mini" # dedictated reasoning model for self-reflection
+model="gpt-4.1"
+fallback_models=["gpt-4.1-mini", "o3-mini"]
+model_reasoning="o4-mini" # dedictated reasoning model for self-reflection
 #model_weak="gpt-4o" # optional, a weaker model to use for some easier tasks
 # CLI
-git_provider="github"
+git_provider="azure"
 publish_output=true
-publish_output_progress=true
+publish_output_progress=false
 verbosity_level=0 # 0,1,2
 use_extra_bad_extensions=false
 # Log
@@ -126,7 +126,7 @@ use_conversation_history=true
 [pr_code_suggestions] # /improve #
 max_context_tokens=24000
 #
-commitable_code_suggestions = false
+commitable_code_suggestions = true
 dual_publishing_score_threshold=-1 # -1 to disable, [0-10] to set the threshold (>=) for publishing a code suggestion both in a table and as commitable
 focus_only_on_problems=true
 #
@@ -134,7 +134,7 @@ extra_instructions = ""
 enable_help_text=false
 enable_chat_text=false
 persistent_comment=true
-max_history_len=4
+max_history_len=0
 publish_output_no_suggestions=true
 # enable to apply suggestion 💎
 apply_suggestions_checkbox=true
@@ -359,4 +359,5 @@ pr_commands = [
     "/describe",
     "/review",
     "/improve",
+    "/update_changelog"
 ]
