@@ -5,6 +5,8 @@ from openai import APIError, AsyncOpenAI, RateLimitError, Timeout
 from retry import retry
 
 from pr_agent.algo.ai_handlers.base_ai_handler import BaseAiHandler
+from pr_agent.algo import NO_SUPPORT_TEMPERATURE_MODELS, SUPPORT_REASONING_EFFORT_MODELS
+from pr_agent.algo.utils import ReasoningEffort
 from pr_agent.config_loader import get_settings
 from pr_agent.log import get_logger
 
@@ -16,7 +18,8 @@ class OpenAIHandler(BaseAiHandler):
         # Initialize OpenAIHandler specific attributes here
         try:
             super().__init__()
-            environ["OPENAI_API_KEY"] = get_settings().openai.key
+            
+            self.api_key = get_settings().openai.key
             if get_settings().get("OPENAI.ORG", None):
                 openai.organization = get_settings().openai.org
             if get_settings().get("OPENAI.API_TYPE", None):
@@ -26,8 +29,9 @@ class OpenAIHandler(BaseAiHandler):
             if get_settings().get("OPENAI.API_VERSION", None):
                 openai.api_version = get_settings().openai.api_version
             if get_settings().get("OPENAI.API_BASE", None):
-                environ["OPENAI_BASE_URL"] = get_settings().openai.api_base
+                self.api_base = get_settings().openai.api_base
 
+            self.reasoning_effort = get_settings().config.reasoning_effort if (get_settings().config.reasoning_effort in [ReasoningEffort.HIGH.value, ReasoningEffort.MEDIUM.value, ReasoningEffort.LOW.value]) else ReasoningEffort.MEDIUM.value
         except AttributeError as e:
             raise ValueError("OpenAI key is required") from e
 
@@ -42,27 +46,39 @@ class OpenAIHandler(BaseAiHandler):
            tries=OPENAI_RETRIES, delay=2, backoff=2, jitter=(1, 3))
     async def chat_completion(self, model: str, system: str, user: str, temperature: float = 0.2):
         try:
-            get_logger().info("System: ", system)
-            get_logger().info("User: ", user)
+            get_logger().debug("System: {}", system)
+            get_logger().debug("User: {}", user)
             messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-            client = AsyncOpenAI()
+            timeout = float(get_settings().config.ai_timeout)
+            client = AsyncOpenAI(timeout=timeout, base_url=self.api_base, api_key=self.api_key)
+
+            # do not set temperature when not supported
+            if model in NO_SUPPORT_TEMPERATURE_MODELS:
+                temperature = None
+            
+            # Add reasoning_effort if model supports it
+            reasoning_effort = None
+            if (model in SUPPORT_REASONING_EFFORT_MODELS):
+                reasoning_effort = self.reasoning_effort
+                get_logger().info(f"Adding reasoning_effort with value {reasoning_effort} to model {model}.")
+
             chat_completion = await client.chat.completions.create(
                 model=model,
                 messages=messages,
                 temperature=temperature,
+                reasoning_effort=reasoning_effort
             )
             resp = chat_completion.choices[0].message.content
             finish_reason = chat_completion.choices[0].finish_reason
             usage = chat_completion.usage
-            get_logger().info("AI response", response=resp, messages=messages, finish_reason=finish_reason,
-                              model=model, usage=usage)
+            get_logger().debug("AI response", response=resp, messages=messages, finish_reason=finish_reason, model=model, usage=usage)
             return resp, finish_reason
-        except (APIError, Timeout) as e:
-            get_logger().error("Error during OpenAI inference: ", e)
+        except APIError as e:
+            get_logger().error("Error during OpenAI inference: {}", e)
             raise
-        except (RateLimitError) as e:
-            get_logger().error("Rate limit error during OpenAI inference: ", e)
+        except RateLimitError as e:
+            get_logger().error("Rate limit error during OpenAI inference: {}", e)
             raise
-        except (Exception) as e:
-            get_logger().error("Unknown error during OpenAI inference: ", e)
+        except Exception as e:
+            get_logger().error("Unknown error during OpenAI inference: {}", e)
             raise
