@@ -7,9 +7,7 @@ from pr_agent.algo.utils import get_version
 from pr_agent.config_loader import get_settings
 from pr_agent.log import get_logger, setup_logger
 
-log_level = os.environ.get("LOG_LEVEL", get_settings().get("config.log_level", "INFO"))
-setup_logger(log_level)
-
+setup_logger()
 
 def set_parser():
     parser = argparse.ArgumentParser(description='AI based pull request analyzer', usage=

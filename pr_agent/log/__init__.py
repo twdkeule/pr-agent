@@ -27,7 +27,14 @@ def inv_analytics_filter(record: dict) -> bool:
     return not record.get("extra", {}).get("analytics", False)
 
 
-def setup_logger(level: str = "INFO", fmt: LoggingFormat = LoggingFormat.CONSOLE):
+def setup_logger(level: str = None, fmt: LoggingFormat = LoggingFormat.CONSOLE, file: str = None):
+    if not level:
+        level = os.environ.get("LOG_LEVEL", get_settings().get("config.log_level", "INFO"))
+    if not level:
+        level = "INFO"
+    if not file:
+        file = os.environ.get("LOG_FILE", get_settings().get("config.log_file", None))
+    
     level: int = logging.getLevelName(level.upper())
     if type(level) is not int:
         level = logging.INFO
@@ -45,7 +52,18 @@ def setup_logger(level: str = "INFO", fmt: LoggingFormat = LoggingFormat.CONSOLE
     elif fmt == LoggingFormat.CONSOLE: # does not print the 'extra' fields
         logger.remove(None)
         logger.add(sys.stdout, level=level, colorize=True, filter=inv_analytics_filter)
-
+    if file:
+        logger.add(
+            file,
+            filter=inv_analytics_filter,
+            level=level,
+            format="{message}",
+            colorize=False,
+            serialize=True,
+            rotation="1 MB",
+            retention="10 days",
+        )
+            
     log_folder = get_settings().get("CONFIG.ANALYTICS_FOLDER", "")
     if log_folder:
         pid = os.getpid()
