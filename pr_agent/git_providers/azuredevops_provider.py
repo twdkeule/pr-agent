@@ -17,16 +17,13 @@ AZURE_DEVOPS_AVAILABLE = True
 ADO_APP_CLIENT_DEFAULT_ID = "499b84ac-1321-427f-aa17-267ca6975798/.default"
 MAX_PR_DESCRIPTION_AZURE_LENGTH = 4000-1
 
-try:
-    # noinspection PyUnresolvedReferences
-    from azure.devops.connection import Connection
-    # noinspection PyUnresolvedReferences
-    from azure.devops.released.git import (Comment, CommentThread, GitPullRequest, GitVersionDescriptor, GitClient, CommentThreadContext, CommentPosition)
-    # noinspection PyUnresolvedReferences
-    from azure.identity import DefaultAzureCredential
-    from msrest.authentication import BasicAuthentication
-except ImportError:
-    AZURE_DEVOPS_AVAILABLE = False
+# noinspection PyUnresolvedReferences
+from azure.devops.connection import Connection
+# noinspection PyUnresolvedReferences
+from azure.devops.released.git import (Comment, CommentThread, GitPullRequest, GitVersionDescriptor, GitClient, CommentThreadContext, CommentPosition)
+# noinspection PyUnresolvedReferences
+from azure.identity import DefaultAzureCredential
+from msrest.authentication import BasicAuthentication
 
 
 class AzureDevopsProvider(GitProvider):
@@ -34,11 +31,6 @@ class AzureDevopsProvider(GitProvider):
     def __init__(
             self, pr_url: Optional[str] = None, incremental: Optional[bool] = False
     ):
-        if not AZURE_DEVOPS_AVAILABLE:
-            raise ImportError(
-                "Azure DevOps provider is not available. Please install the required dependencies."
-            )
-
         self.azure_devops_client = self._get_azure_devops_client()
         self.diff_files = None
         self.workspace_slug = None
