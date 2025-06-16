@@ -1,17 +1,23 @@
 MAX_TOKENS = {
-    "o3-mini": 200000,
     "gpt-4.1-mini": 1047576,
-    "DeepSeek-V3": 128000,
-    "DeepSeek-R1": 128000,
+    "mistral-medium-2505": 131072,
+    # "text-embedding-3-large": 8191,
+    "o1-mini": 128000,
+    "DeepSeek-V3-0324": 128000, # guess
+    "o3-mini": 200000,
+    "DeepSeek-R1-0528": 128000, # guess
+    "whisper": 128000, # guess
     "gpt-4o-mini": 128000,
-    "o4-mini": 200000,
-    "text-embedding-3-large": 8191,
+    "o3": 200000,
+    "grok-3-mini": 128000, # guess
+    "gpt-4o": 128000,
+    "grok-3": 128000, # guess
     "o1": 200000,
     "gpt-4.1": 1047576,
-    "gpt-4o": 128000,
     "gpt-4.1-nano": 1047576,
-    "o3": 200000,
-    "o1-mini": 128000,
+    # "gpt-4o-transcribe": 16000,
+    "o4-mini": 200000,
+    "MAI-DS-R1": 128000, # guess
 }
 
 USER_MESSAGE_ONLY_MODELS = [
